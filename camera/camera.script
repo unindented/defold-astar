@@ -1,0 +1,13 @@
+-- vi:syntax=lua
+
+local hash_look_at = hash("look_at")
+
+function init()
+  msg.post("#camera", "acquire_camera_focus")
+end
+
+function on_message(_, message_id, message)
+  if message_id == hash_look_at then
+    go.set_position(message.position)
+  end
+end

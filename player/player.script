@@ -1,0 +1,58 @@
+-- vi:syntax=lua
+
+local move_speed = 120
+local hash_up = hash("up")
+local hash_down = hash("down")
+local hash_left = hash("left")
+local hash_right = hash("right")
+
+function init(self)
+  msg.post(".", "acquire_input_focus")
+
+  self.speed = vmath.vector3()
+end
+
+
+function final()
+  msg.post(".", "release_input_focus")
+end
+
+function update(self, dt)
+  local pos = go.get_position()
+
+  if vmath.length(self.speed) > 0 then
+    local nspeed = vmath.normalize(self.speed)
+
+    local dpos = nspeed * move_speed * dt
+    pos.x = pos.x + dpos.x
+    pos.y = pos.y + dpos.y
+    go.set_position(pos)
+
+    local dir = vmath.quat_rotation_z(math.atan2(nspeed.y, nspeed.x))
+    go.set_rotation(dir)
+
+    self.speed.x = 0
+    self.speed.y = 0
+  end
+
+  msg.post("camera#script", "look_at", {position = pos})
+end
+
+function on_message(_, message_id)
+  print(message_id)
+end
+
+function on_input(self, action_id)
+  if action_id == hash_up then
+    self.speed.y = self.speed.y + 1
+  end
+  if action_id == hash_down then
+    self.speed.y = self.speed.y - 1
+  end
+  if action_id == hash_left then
+    self.speed.x = self.speed.x - 1
+  end
+  if action_id == hash_right then
+    self.speed.x = self.speed.x + 1
+  end
+end
